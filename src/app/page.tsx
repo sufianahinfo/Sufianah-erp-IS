@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Link from "next/link"
 import { Dashboard } from "@/components/dashboard"
 import { POSModule } from "@/components/pos-module"
 import { ProductManagement } from "@/components/product-management"
