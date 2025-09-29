@@ -93,7 +93,7 @@ export function AdvancedInventoryModule() {
       setProducts(productsData)
       setExpiringBatches(expiringData)
       setLowStockProducts(lowStockData)
-    } catch (error) {
+    } catch {
       toast({ title: "Error", description: "Failed to load data", variant: "destructive" })
     } finally {
       setLoading(false)
@@ -106,7 +106,7 @@ export function AdvancedInventoryModule() {
       await loadData()
       setBatchDialogOpen(false)
       toast({ title: "Success", description: "Batch created successfully" })
-    } catch (error) {
+    } catch {
       toast({ title: "Error", description: "Failed to create batch", variant: "destructive" })
     }
   }
@@ -117,7 +117,7 @@ export function AdvancedInventoryModule() {
       await loadData()
       setLocationDialogOpen(false)
       toast({ title: "Success", description: "Warehouse location created successfully" })
-    } catch (error) {
+    } catch {
       toast({ title: "Error", description: "Failed to create location", variant: "destructive" })
     }
   }
@@ -128,7 +128,7 @@ export function AdvancedInventoryModule() {
       await loadData()
       setReorderDialogOpen(false)
       toast({ title: "Success", description: "Reorder rule created successfully" })
-    } catch (error) {
+    } catch {
       toast({ title: "Error", description: "Failed to create reorder rule", variant: "destructive" })
     }
   }
