@@ -36,12 +36,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ChangePasswordModal } from "@/components/profile/change-password-modal"
 import { DevNotice } from "@/components/dev-notice"
+import { RoleSwitcher } from "@/components/role-switcher"
+import { RolePermissions } from "@/components/role-permissions"
 import Image from "next/image"
 
 export default function ERPSystem() {
   const [activeModule, setActiveModule] = useState("pos")
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [showRoleTesting, setShowRoleTesting] = useState(false)
   const { user, logout } = useAuth()
 
   // Restore active module from localStorage on page load (synchronous for speed)
@@ -69,7 +72,17 @@ export default function ERPSystem() {
   const renderModule = () => {
     switch (activeModule) {
       case "dashboard":
-        return <Dashboard />
+        return (
+          <div className="space-y-6">
+            <Dashboard />
+            {showRoleTesting && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <RoleSwitcher />
+                <RolePermissions selectedRole={user?.role || "admin"} />
+              </div>
+            )}
+          </div>
+        )
       case "pos":
         return <POSModule />
       case "purchasing":
@@ -219,6 +232,14 @@ export default function ERPSystem() {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowRoleTesting(!showRoleTesting)}
+              className="text-xs"
+            >
+              {showRoleTesting ? "Hide" : "Show"} Role Testing
+            </Button>
             {/* DEVELOPMENT MODE - SIMPLIFIED USER UI */}
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Development Mode</span>

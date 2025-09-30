@@ -28,6 +28,7 @@ interface AuthContextType {
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>
   hasRole: (role: UserRole) => boolean
   hasAnyRole: (roles: UserRole[]) => boolean
+  switchRole: (role: UserRole) => void // For development testing
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType)
@@ -41,7 +42,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // COMMENTED OUT FOR DEVELOPMENT - BYPASSING LOGIN
+  // DEVELOPMENT MODE - Default admin user with role switching capability
   const [user, setUser] = useState<LocalUser | null>({
     email: "admin@nucleusone.com",
     displayName: "Admin User",
@@ -304,7 +305,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user ? roles.includes(user.role) : false
   }
 
-  const value = { user, loading, signIn, logout, changePassword, hasRole, hasAnyRole }
+  // Development function to switch roles for testing
+  const switchRole = (role: UserRole): void => {
+    if (user) {
+      setUser({
+        ...user,
+        role,
+        displayName: role === "admin" ? "Admin User" : "Cashier User"
+      })
+    }
+  }
+
+  const value = { user, loading, signIn, logout, changePassword, hasRole, hasAnyRole, switchRole }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
