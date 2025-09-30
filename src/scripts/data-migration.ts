@@ -74,7 +74,7 @@ class DataMigrationService {
   // Initialize the database with default user
   static async initializeDatabase(): Promise<void> {
     console.log('Initializing database with default user...')
-    await AuthService.initializeDefaultUser()
+    await AuthService.initializeDefaultUsers()
     console.log('Database initialized successfully')
   }
 

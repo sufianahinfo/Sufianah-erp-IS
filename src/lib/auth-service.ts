@@ -185,6 +185,11 @@ class AuthService {
     // You can add additional validation here, like checking if user still exists in database
     return true
   }
+
+  // Alias for login method for consistency
+  static async signIn(email: string, password: string): Promise<AuthState> {
+    return this.login(email, password)
+  }
 }
 
 export default AuthService

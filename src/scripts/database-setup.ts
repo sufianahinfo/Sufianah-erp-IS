@@ -14,7 +14,7 @@ export class DatabaseSetup {
     try {
       // Step 1: Initialize authentication with default user
       console.log('1. Setting up authentication...')
-      await AuthService.initializeDefaultUser()
+      await AuthService.initializeDefaultUsers()
       
       // Step 2: Initialize invoice counter
       console.log('2. Initializing invoice counter...')
