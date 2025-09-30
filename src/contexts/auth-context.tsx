@@ -42,34 +42,44 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // DEVELOPMENT MODE - Default admin user with role switching capability
-  const [user, setUser] = useState<LocalUser | null>({
-    email: "admin@nucleusone.com",
-    displayName: "Admin User",
-    uid: "dev-admin-001",
-    role: "admin"
-  })
-  const [loading, setLoading] = useState(false) // Set to false to skip loading state
+  const [user, setUser] = useState<LocalUser | null>(null)
+  const [loading, setLoading] = useState(true)
   const { toast } = useToast()
 
   // COMMENTED OUT AUTHENTICATION LOGIC FOR DEVELOPMENT
-  // Fast session restoration - check localStorage first, then initialize services
+  // Initialize authentication system
   useEffect(() => {
     const init = async () => {
       try {
-        // Initialize services in background for development
-        Promise.all([
+        // Initialize services
+        await Promise.all([
           UserService.initializeDefaultUsers(),
-          AuthService.initializeDefaultUser(),
+          AuthService.initializeDefaultUsers(),
           InvoiceCounterService.initializeCounter(),
           LabelPrintingService.initializeDefaultTemplates(),
           BranchManagementService.initializeDefaultBranch(),
           AdvancedInventoryService.initializeDefaultData(),
           PricingPromotionsService.initializeDefaultData()
-        ]).catch(e => console.warn("Background initialization failed", e))
-        
+        ])
+
+        // Check for existing session in localStorage
+        const savedAuth = localStorage.getItem('auth_state')
+        if (savedAuth) {
+          const authState = JSON.parse(savedAuth)
+          if (authState.isAuthenticated && authState.user) {
+            setUser({
+              email: authState.user.email,
+              displayName: authState.user.name,
+              uid: authState.user.id,
+              role: authState.user.role
+            })
+          }
+        }
+
+        setLoading(false)
       } catch (e) {
         console.warn("Auth init failed", e)
+        setLoading(false)
       }
     }
     init()
@@ -156,11 +166,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
   */
 
-  // COMMENTED OUT FOR DEVELOPMENT - BYPASSING LOGIN
   const signIn = async (email: string, password: string) => {
-    // Development mode - no actual authentication
-    console.log("Development mode: Login bypassed")
-    toast({ title: "Development Mode", description: "Login functionality is disabled for development" })
+    setLoading(true)
+    try {
+      // Use AuthService for authentication
+      const authResult = await AuthService.signIn(email, password)
+      
+      if (authResult.isAuthenticated && authResult.user) {
+        setUser({
+          email: authResult.user.email,
+          displayName: authResult.user.name,
+          uid: authResult.user.id,
+          role: authResult.user.role
+        })
+        
+        toast({ 
+          title: "Login Successful", 
+          description: `Welcome back, ${authResult.user.name}!` 
+        })
+      } else {
+        throw new Error("Invalid credentials")
+      }
+    } catch (error) {
+      console.error("Sign in error:", error)
+      toast({ 
+        title: "Login Failed", 
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive"
+      })
+      throw error
+    } finally {
+      setLoading(false)
+    }
   }
 
   /* COMMENTED OUT ORIGINAL SIGNIN LOGIC
@@ -234,8 +271,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = async () => {
-    console.log("Development mode: Logout bypassed")
-    toast({ title: "Development Mode", description: "Logout functionality is disabled for development" })
+    try {
+      // Clear user state
+      setUser(null)
+      
+      // Clear localStorage
+      localStorage.removeItem('auth_state')
+      
+      toast({ 
+        title: "Logged Out", 
+        description: "You have been successfully logged out" 
+      })
+    } catch (error) {
+      console.error("Logout error:", error)
+      toast({ 
+        title: "Logout Error", 
+        description: "There was an error logging out",
+        variant: "destructive"
+      })
+    }
   }
 
   /* COMMENTED OUT ORIGINAL AUTHENTICATION FUNCTIONS
@@ -305,15 +359,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return user ? roles.includes(user.role) : false
   }
 
-  // Development function to switch roles for testing
+  // Development function to switch roles for testing (Admin only)
   const switchRole = (role: UserRole): void => {
-    if (user) {
-      setUser({
-        ...user,
-        role,
-        displayName: role === "admin" ? "Admin User" : "Cashier User"
+    if (!user) {
+      toast({ 
+        title: "Access Denied", 
+        description: "You must be logged in to switch roles",
+        variant: "destructive"
       })
+      return
     }
+
+    if (user.role !== 'admin') {
+      toast({ 
+        title: "Access Denied", 
+        description: "Only administrators can switch roles",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setUser({
+      ...user,
+      role,
+      displayName: role === "admin" ? "Admin User" : "Cashier User"
+    })
+    
+    // Update localStorage
+    localStorage.setItem('userRole', role)
+    
+    const roleText = role === 'admin' ? 'Administrator' : 'Cashier'
+    toast({ title: "Role Switched", description: `Now acting as ${roleText}` })
   }
 
   const value = { user, loading, signIn, logout, changePassword, hasRole, hasAnyRole, switchRole }

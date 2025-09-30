@@ -1,17 +1,15 @@
 "use client"
 
 import type React from "react"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/auth-context"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // COMMENTED OUT FOR DEVELOPMENT - BYPASSING AUTHENTICATION
-  // Directly return children without any authentication checks
-  return <>{children}</>
-
-  /* COMMENTED OUT ORIGINAL AUTHENTICATION LOGIC
   const { user, loading } = useAuth()
   const router = useRouter()
 
@@ -46,5 +44,4 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   return <>{children}</>
-  */
 }

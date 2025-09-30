@@ -9,7 +9,7 @@ export interface User {
   email: string
   name: string
   password: string // In production, this should be hashed
-  role: "admin"
+  role: "admin" | "cashier"
   createdAt: string
   lastLogin?: string
 }
@@ -23,8 +23,8 @@ class AuthService {
   private static readonly STORAGE_KEY = 'auth_state'
   private static readonly USERS_PATH = 'users'
 
-  // Initialize default admin user in database
-  static async initializeDefaultUser(): Promise<void> {
+  // Initialize default users in database
+  static async initializeDefaultUsers(): Promise<void> {
     if (!db) {
       console.warn('Database not initialized')
       return
@@ -34,19 +34,32 @@ class AuthService {
       const usersRef = ref(db, this.USERS_PATH)
       const snapshot = await get(usersRef)
       
-      // If no users exist, create the default admin user
+      // If no users exist, create the default users
       if (!snapshot.exists()) {
-        const defaultUser: User = {
-          id: 'admin-001',
-          email: process.env.NEXT_PUBLIC_SINGLE_USER_EMAIL || 'ahmer@food.com',
-          name: process.env.NEXT_PUBLIC_SINGLE_USER_NAME || 'Admin User',
-          password: 'Ahmer1122', // In production, hash this password
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        }
+        const defaultUsers: User[] = [
+          {
+            id: 'admin-001',
+            email: 'admin@sufianah.com',
+            name: 'Administrator',
+            password: 'Admin1@control', // Admin password
+            role: 'admin',
+            createdAt: new Date().toISOString()
+          },
+          {
+            id: 'cashier-001',
+            email: 'cashier@sufianah.com',
+            name: 'Cashier',
+            password: 'cashier123@@', // Cashier password
+            role: 'cashier',
+            createdAt: new Date().toISOString()
+          }
+        ]
 
-        await set(ref(db, `${this.USERS_PATH}/${defaultUser.id}`), defaultUser)
-        console.log('Default admin user created')
+        // Create both users
+        for (const user of defaultUsers) {
+          await set(ref(db, `${this.USERS_PATH}/${user.id}`), user)
+        }
+        console.log('Default users created: Admin and Cashier')
       }
     } catch (error) {
       console.error('Error initializing default user:', error)

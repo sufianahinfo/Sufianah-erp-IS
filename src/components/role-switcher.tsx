@@ -11,6 +11,11 @@ export function RoleSwitcher() {
   const { user, switchRole } = useAuth()
   const [selectedRole, setSelectedRole] = useState<UserRole>(user?.role || "admin")
 
+  // Only show role switcher for admins
+  if (!user || user.role !== 'admin') {
+    return null
+  }
+
   const handleRoleChange = (newRole: UserRole) => {
     setSelectedRole(newRole)
     switchRole(newRole)

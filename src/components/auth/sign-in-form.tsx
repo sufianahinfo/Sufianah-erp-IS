@@ -40,8 +40,13 @@ export function SignInForm() {
   return (
     <div className="w-full space-y-6">
       <div className="text-center">
-        <h3 className="text-2xl font-bold text-foreground mb-2">Admin Login</h3>
+        <h3 className="text-2xl font-bold text-foreground mb-2">Sufianah ERP Login</h3>
         <p className="text-muted-foreground">Enter your credentials to access the ERP system</p>
+        <div className="mt-4 p-3 bg-muted rounded-lg text-sm">
+          <p className="font-medium mb-2">Login Credentials:</p>
+          <p><strong>Admin:</strong> admin@sufianah.com / Admin1@control</p>
+          <p><strong>Cashier:</strong> cashier@sufianah.com / cashier123@@</p>
+        </div>
       </div>
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
