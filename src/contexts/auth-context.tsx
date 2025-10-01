@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Initialize services
         await Promise.all([
           UserService.initializeDefaultUsers(),
-          AuthService.initializeDefaultUsers(),
+          AuthService.resetToDefaultUsers(), // Reset to ensure correct credentials
           InvoiceCounterService.initializeCounter(),
           LabelPrintingService.initializeDefaultTemplates(),
           BranchManagementService.initializeDefaultBranch(),

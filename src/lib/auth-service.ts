@@ -34,35 +34,33 @@ class AuthService {
       const usersRef = ref(db, this.USERS_PATH)
       const snapshot = await get(usersRef)
       
-      // If no users exist, create the default users
-      if (!snapshot.exists()) {
-        const defaultUsers: User[] = [
-          {
-            id: 'admin-001',
-            email: 'admin@sufianah.com',
-            name: 'Administrator',
-            password: 'Admin1@control', // Admin password
-            role: 'admin',
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: 'cashier-001',
-            email: 'cashier@sufianah.com',
-            name: 'Cashier',
-            password: 'cashier123@@', // Cashier password
-            role: 'cashier',
-            createdAt: new Date().toISOString()
-          }
-        ]
-
-        // Create both users
-        for (const user of defaultUsers) {
-          await set(ref(db, `${this.USERS_PATH}/${user.id}`), user)
+      const defaultUsers: User[] = [
+        {
+          id: 'admin-001',
+          email: 'admin@sufianah.com',
+          name: 'Administrator',
+          password: 'Admin1@control', // Admin password
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 'cashier-001',
+          email: 'cashier@sufianah.com',
+          name: 'Cashier',
+          password: 'cashier123@@', // Cashier password
+          role: 'cashier',
+          createdAt: new Date().toISOString()
         }
-        console.log('Default users created: Admin and Cashier')
+      ]
+
+      // Always create/update the default users (overwrite existing ones)
+      for (const user of defaultUsers) {
+        await set(ref(db, `${this.USERS_PATH}/${user.id}`), user)
       }
+      console.log('Default users created/updated: Admin and Cashier')
+      
     } catch (error) {
-      console.error('Error initializing default user:', error)
+      console.error('Error initializing default users:', error)
     }
   }
 
@@ -189,6 +187,27 @@ class AuthService {
   // Alias for login method for consistency
   static async signIn(email: string, password: string): Promise<AuthState> {
     return this.login(email, password)
+  }
+
+  // Reset users to default (for development/testing)
+  static async resetToDefaultUsers(): Promise<void> {
+    if (!db) {
+      console.warn('Database not initialized')
+      return
+    }
+
+    try {
+      // Clear all existing users
+      const usersRef = ref(db, this.USERS_PATH)
+      await set(usersRef, null)
+      
+      // Create fresh default users
+      await this.initializeDefaultUsers()
+      
+      console.log('Users reset to default: Admin and Cashier')
+    } catch (error) {
+      console.error('Error resetting users:', error)
+    }
   }
 }
 
